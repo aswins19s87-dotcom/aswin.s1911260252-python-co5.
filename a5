@@ -1,0 +1,38 @@
+#A5
+positive = ["good", "clean", "fast", "helpful", "improved"]
+negative = ["bad", "dirty", "slow", "rude", "smoke", "broken"]
+
+def sentiment(text):
+    words = text.lower().replace(".", "").split()
+    score = 0
+
+    for i, word in enumerate(words):
+        value = 1 if word in positive else -1 if word in negative else 0
+
+        if i > 0 and words[i-1] in ["not", "never", "no"]:
+            value = -value
+
+        score += value
+
+    if score > 0:
+        return "Positive"
+    elif score < 0:
+        return "Negative"
+    return "Neutral"
+
+def summary(text):
+    sentences = text.split(".")
+    return sentences[0]
+
+def chatbot(question):
+    if "adyar" in question.lower():
+        return "PM2.5 in Adyar is 48."
+    elif "guindy" in question.lower():
+        return "PM2.5 in Guindy is 95."
+    return "Sorry, answer not available."
+
+text = "Roads are clean and bus is fast."
+
+print("Sentiment:", sentiment(text))
+print("Summary:", summary(text))
+print("Chatbot:", chatbot("What is PM2.5 in Adyar?"))
