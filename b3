@@ -1,0 +1,67 @@
+#B3
+import sqlite3
+import pandas as pd
+import time
+
+data = [
+    ("Adyar", "2026-10-01", 48),
+    ("Adyar", "2026-10-01", 60),
+    ("Guindy", "2026-10-01", 95),
+    ("Guindy", "2026-10-01", 121)
+]
+
+# Method 1: Python loops
+def python_method(data):
+    result = {}
+
+    for s, d, v in data:
+        key = (s, d)
+
+        if key not in result:
+            result[key] = []
+
+        result[key].append(v)
+
+    return {k: sum(v)/len(v) for k, v in result.items()}
+
+# Method 2: Pandas
+def pandas_method(data):
+    df = pd.DataFrame(
+        data, columns=["station", "day", "pm25"])
+
+    return df.groupby(
+        ["station", "day"])["pm25"].mean()
+
+# Method 3: SQL
+def sql_method(data):
+    con = sqlite3.connect(":memory:")
+
+    con.execute(
+        "CREATE TABLE aq(station TEXT, day TEXT, pm25 REAL)")
+
+    con.executemany(
+        "INSERT INTO aq VALUES(?,?,?)", data)
+
+    result = con.execute("""
+        SELECT station, day, AVG(pm25)
+        FROM aq GROUP BY station, day
+    """).fetchall()
+
+    con.close()
+    return result
+
+# Display results
+print("Python:", python_method(data))
+print("Pandas:", pandas_method(data))
+print("SQL:", sql_method(data))
+
+# Compare execution time
+for name, func in [
+    ("Python", python_method),
+    ("Pandas", pandas_method),
+    ("SQL", sql_method)
+]:
+    start = time.perf_counter()
+    func(data)
+    print(name, "Time:", round(
+        time.perf_counter()-start, 6))
